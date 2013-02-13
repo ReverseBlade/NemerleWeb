@@ -23,7 +23,7 @@ module NemerleWebPropertiesImpl
       def parser = TypeScriptInterfaceParser();
       def dir = Path.GetDirectoryName(typer.Manager.Options.ProjectPath);
       def tsFiles = Directory.EnumerateFiles(Path.Combine(dir, path), "*.d.ts", SearchOption.AllDirectories);
-      //def globalJs = typer.Env.Define(<[ decl: public module javascript {} ]>);
+      def globalJs = typer.Env.Define(<[ decl: public module javascript {} ]>);
 
       //assert2(false);  
               
@@ -34,10 +34,10 @@ module NemerleWebPropertiesImpl
         | (pos, result) when pos == parser.ParsingSource.OriginalText.Length => 
           foreach(r in result) 
           {
-          //| Var as v => CreateTypeScriptGlobalVar(globalJs, v, typer);
-          //| VarType as v => CreateTypeScriptGlobalVarType(globalJs, v, typer);
-          //| Function as f => CreateTypeScriptGlobalFunction(globalJs, f, typer); 
-          //| Interface as i => CreateTypeScriptInterface(i, typer);
+          | Var as v => CreateTypeScriptGlobalVar(globalJs, v, typer);
+          | VarType as v => CreateTypeScriptGlobalVarType(globalJs, v, typer);
+          | Function as f => CreateTypeScriptGlobalFunction(globalJs, f, typer); 
+          | Interface as i => CreateTypeScriptInterface(i, typer);
           | _ => ()
           }
         | (pos, _) => 
@@ -47,20 +47,28 @@ module NemerleWebPropertiesImpl
       }
       
       // Fixate global
-      //globalJs.Compile();
+      globalJs.Compile();
+      
     | _ => Message.Error(<#Unrecognized option format, should be tuple of two strings: ("TypeScriptPath", "Typescripts") #>)
     }
   }
   
   private CreateTypeScriptGlobalVar(tb : TypeBuilder, var : TypeScriptGlobalDeclaration.Var, typer : Typer) : void
   {
-    _ = tb.DefineWithSource(<[ decl: public $(var.Name : usesite) {} ]>);
-    DefineMembers(tb, var.Members);
+      def anonName = var.Name + "AnonymousClass";
+      def anonTb = tb.DefineNestedType(<[ decl: public class $(anonName : usesite) {} ]>);
+      
+      _ = tb.DefineWithSource(<[ decl: public $(var.Name : usesite) : $(anonName : usesite) ]>);
+      
+      
+    DefineMembers(anonTb, var.Members);
+    anonTb.Compile();
+    
   }
   
   private CreateTypeScriptGlobalVarType(tb : TypeBuilder, var : TypeScriptGlobalDeclaration.VarType, _typer : Typer) : void
   {
-    _ = tb.DefineWithSource(<[ decl: public $(var.Name : usesite) : option[$(ConvertType(var.Type))] ]>)
+      _ = tb.DefineWithSource(<[ decl: public $(var.Name : usesite) : option[$(ConvertType(var.Type))] ]>);
   }
   
   private CreateTypeScriptGlobalFunction(tb : TypeBuilder, function : TypeScriptGlobalDeclaration.Function, _typer : Typer) : void
@@ -80,6 +88,7 @@ module NemerleWebPropertiesImpl
     }
     
     DefineMembers(tb, inter.Members);
+    tb.Compile();
   }
 
   private DefineField(tb : TypeBuilder, name : string, isNullable : bool, type : PExpr) : void
@@ -139,6 +148,7 @@ module NemerleWebPropertiesImpl
         def parms = parms.Map(p => p.Type).Append([ret]).Map(ConvertType);
         <[ System.Func.[{..$(parms)}] ]>
     | Normal("any") => <[ object ]>
+    | Normal("void") => <[ void ]>
     | Normal("number") => <[ float ]>
     | Normal(name) => <[ $(name : usesite) ]> 
     | _ => <[ object ]>

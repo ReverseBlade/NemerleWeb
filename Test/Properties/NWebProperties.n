@@ -1,2 +1,2 @@
 ﻿[assembly: NemerleWebProperties((TypeScriptPath, TSBase))]
-[assembly: NemerleWebProperties((TypeScriptPath, TS))]
+//[assembly: NemerleWebProperties((TypeScriptPath, TS))]

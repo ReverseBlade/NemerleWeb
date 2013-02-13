@@ -11,50 +11,61 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 
 using NemerleWeb;
+using TypeScriptInterface;
 
 module Program
 {
-  Main() : void
-  {
-    /*def parser = TypeScriptInterfaceParser();
-    def res = parser.Parse(System.IO.File.ReadAllText("c:\\dev\\jquery.d.ts"));
-    _ = match(res)
+    Main() : void
     {
-    | Some(interfaces) => 
-      def i = interfaces;
-      ""
-    | None => "fuck that"
+        def parser = TypeScriptInterfaceParser();
+        def res = parser.Parse(System.IO.File.ReadAllText("C:\\Users\\user\\Documents\\GitHub\\NemerleWeb\\Test\\TSBase\\lib.d.ts"));
+        _ = match(res)
+               {
+                   | Some(interfaces) => 
+                   {
+                       def i = interfaces;
+                       
+                       foreach(inter in interfaces)
+                       {
+                           def s = inter.ToString();
+                       }
+                       ""
+                   }
+                   | None => "fuck that"
+               }
+
+
+        def result = nweb Test();
+
+        foreach (s in NWebData.GetAllScriptNames())
+            WriteLine(NWebData.GetScript(s));
+        
+        WriteLine(result);
+        _ = Console.ReadKey();
+        
     }
-    */
-    def result = nweb Test();
-    
-    foreach (s in NWebData.GetAllScriptNames())
-      WriteLine(NWebData.GetScript(s));
-    
-    WriteLine(result);
-    _ = Console.ReadKey();
-  }
 }
 
 [Unit]
 public class Test
 {   
-  x  : list[string] = ["3", "4"];
-  
-  F() : void  { _ = x is ["3", "4"]; } 
-  More() : void {}
-  Less() : void {}
-  Letters : list[string];
-  OddLettersOnly : bool;
-  
-  [Html]
-  public View() : string
-  {
+    x  : list[string] = ["3", "4"];
+
+
+    F() : void  { _ = x is ["3", "4"]; } 
+    More() : void {}
+    Less() : void {}
+    Letters : list[string];
+    OddLettersOnly : bool;
+
+    [Html]
+    public View() : string
+    {
     <# 
        <div>
         <div></div>
         <div></div>
        </div>
     #>
-  }
+    }
 }
